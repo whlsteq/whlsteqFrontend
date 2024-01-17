@@ -7,26 +7,29 @@ import axios from "axios";
 
 export async function SignUpApi(body) {
   var result = await axios.post("/api/v1/users/add", body).catch((error) => {
-    // console.error("asdasdasd",error.response.data.name);
+    // console.error("asdasdasd",error.response.data);
     // console.log("DENEMEEEEEEE",error.response.data.validationErrors);
     var errorsResponse = {};
+    var businessError = {};
 
-    if (error.response && error.response.data) {
+    if (error.response && error.response?.data) {
       if (error.response.status === 400) {
         // ValidationProblemDetails için 400 durum kodu
-        Object.keys(error.response.data.validationErrors).forEach((key) => {
-          errorsResponse[key] = error.response.data.validationErrors[key];
-        });
-        console.log(" hata denemesi ", errorsResponse);
-        return errorsResponse;
+        if (error.response.data.validationErrors) {
+          Object.keys(error.response.data.validationErrors).forEach((key) => {
+            errorsResponse[key] = error.response.data.validationErrors[key];
+          });
+          // console.log(" hata denemesi ", errorsResponse);
+          return errorsResponse;
+        }
       } else {
-        throw error; // Diğer hataları fırlat
       }
+      throw error;
     } else {
       throw error; // Diğer hataları fırlat
     }
   });
-  console.log("deneme");
+  // console.log("deneme");
   return result;
 }
 

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SignUpApi } from "./api";
+import { Input } from "./components/Input";
 
 export function SignUp() {
   const [name, setName] = useState();
@@ -8,14 +9,41 @@ export function SignUp() {
   const [passwordRepeat, setPasswordRepeat] = useState();
   const [email, setEmail] = useState();
   const [apiProgression, setAPIProgression] = useState(false);
-  const [errorMessage, setSerrorMessage] = useState();
-  const [emailError, setEmailError] = useState(); // Email hata mesajını tutmak için
-
-  const [errors, setErrors] = useState();
+  const [errorMessage, seterrorMessage] = useState();
+  const [nameErrorMessage, setNameErrorMessage] = useState();
+  const [surnameErrorMessage, setSurnameErrorMessage] = useState();
+  const [emailErrorMessage, setEmailErrorMessage] = useState();
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState();
+  const [generalErrorMessage, setGeneralErrorMessage] = useState();
 
   const onSubmit = async (event) => {
     event.preventDefault();
     setAPIProgression(true);
+    seterrorMessage();
+    setNameErrorMessage();
+    setSurnameErrorMessage();
+    setEmailErrorMessage();
+    setPasswordErrorMessage();
+    setGeneralErrorMessage();
+
+    // useEffect(() => {
+    //   seterrorMessage(function (lastErrors) {
+    //     return {
+    //       ...lastErrors,
+    //       name: undefined
+    //     }
+    //   });
+    // },[name]); hata dan sonra name textbox a yazi yazilinca hata olan yeri kaldiriyor.
+
+
+    // useEffect(() => {
+    //   seterrorMessage(function (lastErrors) {
+    //     return {
+    //       ...lastErrors,
+    //       email: undefined
+    //     }
+    //   });
+    // },[email]); hata dan sonra email textbox a yazi yazilinca hata olan yeri kaldiriyor.
 
     try {
       const response = await SignUpApi({
@@ -25,12 +53,22 @@ export function SignUp() {
         email,
       });
 
-      console.log("yanit", response);
+      // console.log("yanit", response);
       // if (response.validationErrors){
       //   console.log("validationErrors",response.validationErrors);
       // }
-      setSerrorMessage(response);
+      seterrorMessage(response);
+      setNameErrorMessage(response.name);
+      setSurnameErrorMessage(response.surname);
+      setEmailErrorMessage(response.email);
+      setPasswordErrorMessage(response.password);
     } catch (error) {
+      if (error.response?.data.name === "BusinessException") {
+        // console.log("error", error.response);
+        setEmailErrorMessage(error.response.data.message);
+      } else {
+        setGeneralErrorMessage("Unexpected error occured. Please try again.");
+      }
     } finally {
       setAPIProgression(false);
     }
@@ -43,9 +81,45 @@ export function SignUp() {
           <div className="text-center card-header">
             <h1>Sign Up</h1>
           </div>
-
           <div className="card-body">
-            <div className="mb-3">
+            <Input
+              id="name"
+              label="Name"
+              inputType="text"
+              error={nameErrorMessage}
+              onChange={(event) => setName(event.target.value)}
+            />
+            <Input
+              id="surname"
+              label="Surname"
+              inputType="text"
+              error={surnameErrorMessage}
+              onChange={(event) => setSurname(event.target.value)}
+            />
+            <Input
+              id="email"
+              label="E-mail"
+              inputType="email"
+              error={emailErrorMessage}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+
+            <Input
+              id="password"
+              label="Password"
+              inputType="password"
+              error={passwordErrorMessage}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+            <Input
+              id="passwordRepeat"
+              label="Password Repeat"
+              inputType="password"
+              error={passwordErrorMessage}
+              onChange={(event) => setPasswordRepeat(event.target.value)}
+            />
+
+            {/* <div className="mb-3">
               <label htmlFor="name" className="form-label">
                 Name
               </label>
@@ -54,63 +128,12 @@ export function SignUp() {
                 name="name"
                 id="name"
                 onChange={(event) => setName(event.target.value)}
-                className="form-control"
+                className={
+                  nameErrorMessage ? "form-control is-invalid" : "form-control"
+                }
               />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="surname" className="form-label">
-                Surname
-              </label>
-              <input
-                type="text"
-                name="surname"
-                id="surname"
-                onChange={(event) => setSurname(event.target.value)}
-                className="form-control"
-              ></input>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                onChange={(event) => setEmail(event.target.value)}
-                className="form-control"
-              />
-              {emailError && <div className="text-danger">{emailError}</div>}{" "}
-              {/* Email hatası varsa göster */}
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                id="password"
-                onChange={(event) => setPassword(event.target.value)}
-                className="form-control"
-              ></input>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="passwordRepeat" className="form-label">
-                Password Repeat
-              </label>
-              <input
-                type="password"
-                name="passwordRepeat"
-                id="passwordRepeat"
-                onChange={(event) => setPasswordRepeat(event.target.value)}
-                className="form-control"
-              ></input>
-            </div>
+              <div className="invalid-feedback">{nameErrorMessage}</div>
+            </div> */}
 
             {errorMessage && (
               <div className="alert alert-danger" role="alert">
@@ -119,6 +142,18 @@ export function SignUp() {
                 ))}
               </div>
             )}
+
+            {emailErrorMessage && !errorMessage && (
+              <div className="alert alert-danger" role="alert">
+                {emailErrorMessage}
+              </div>
+            )}
+            {generalErrorMessage && (
+              <div className="alert alert-danger" role="alert">
+                {generalErrorMessage}
+              </div>
+            )}
+
             <div className="text-center">
               <button
                 className="btn btn-dark"
