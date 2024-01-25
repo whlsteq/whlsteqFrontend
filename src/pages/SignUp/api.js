@@ -7,8 +7,6 @@ import axios from "axios";
 
 export async function SignUpApi(body) {
   var result = await axios.post("/api/v1/users/add", body).catch((error) => {
-    // console.error("asdasdasd",error.response.data);
-    // console.log("DENEMEEEEEEE",error.response.data.validationErrors);
     var errorsResponse = {};
     var businessError = {};
 

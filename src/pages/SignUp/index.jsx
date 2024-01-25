@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SignUpApi } from "./api";
 import { Input } from "./components/Input";
 
@@ -35,7 +35,6 @@ export function SignUp() {
     //   });
     // },[name]); hata dan sonra name textbox a yazi yazilinca hata olan yeri kaldiriyor.
 
-
     // useEffect(() => {
     //   seterrorMessage(function (lastErrors) {
     //     return {
@@ -52,11 +51,6 @@ export function SignUp() {
         password,
         email,
       });
-
-      // console.log("yanit", response);
-      // if (response.validationErrors){
-      //   console.log("validationErrors",response.validationErrors);
-      // }
       seterrorMessage(response);
       setNameErrorMessage(response.name);
       setSurnameErrorMessage(response.surname);
@@ -73,7 +67,13 @@ export function SignUp() {
       setAPIProgression(false);
     }
   };
-
+  const passwordError=useMemo(()=>{
+      if(password &&password!== passwordRepeat){
+        return "Passwords do not match";
+      }
+    },
+    [password, passwordRepeat]
+  )
   return (
     <div className="container">
       <div className="col-lg-5 offset-lg-3 col-sm-8 offset-sm-2">
@@ -115,25 +115,9 @@ export function SignUp() {
               id="passwordRepeat"
               label="Password Repeat"
               inputType="password"
-              error={passwordErrorMessage}
+              error={!passwordErrorMessage && passwordError && passwordError}
               onChange={(event) => setPasswordRepeat(event.target.value)}
             />
-
-            {/* <div className="mb-3">
-              <label htmlFor="name" className="form-label">
-                Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                id="name"
-                onChange={(event) => setName(event.target.value)}
-                className={
-                  nameErrorMessage ? "form-control is-invalid" : "form-control"
-                }
-              />
-              <div className="invalid-feedback">{nameErrorMessage}</div>
-            </div> */}
 
             {errorMessage && (
               <div className="alert alert-danger" role="alert">
@@ -157,9 +141,9 @@ export function SignUp() {
             <div className="text-center">
               <button
                 className="btn btn-dark"
-                disabled={
-                  apiProgression || !password || password !== passwordRepeat
-                }
+                // disabled={
+                //   apiProgression || !password || password !== passwordRepeat
+                // }
               >
                 {apiProgression && (
                   <span
